@@ -1,0 +1,130 @@
+<?php
+
+class WotClanRole extends CActiveRecord
+{
+	/**
+	 * 
+	 * @return WotClanRole
+	 */
+	public static function model($className=__CLASS__)
+	{
+		return parent::model($className);
+	}
+	
+	public function tableName()
+	{
+		return 'wot_clan_role';
+	}
+	
+	public function relations()
+	{
+		return array(
+		);
+	}
+	
+	protected function beforeSave()
+	{
+		if(parent::beforeSave()){
+			$this->m_time=new CDbExpression('now()');
+			if(is_numeric($this->created_at))
+				$this->created_at=date('Y-m-d H:i:s', $this->created_at);
+			if(is_numeric($this->created_at))
+				$this->updated_at=date('Y-m-d H:i:s', $this->updated_at);
+			return true;
+		}
+		else
+			return false;
+	}
+	
+	/**
+	 * 
+	 * @param integer $clanId
+	 * @param array() $data
+	 */
+	public static function wotLoad($clanId, $data)
+	{
+		$clan=self::model()->findByPk($clanId);
+		if(empty($clan)){
+			$clan=new self();
+			$clan->clan_id=$clanId;
+		}
+		foreach ($data as $key=>$value){
+			$clan->$key=$value;
+		}
+		$clan->save(false);
+	}
+	
+	public static function process()
+	{
+		$models=self::model()->findAll(array(
+			'index'=>'clan_id',
+			'limit'=>1,
+		//	'condition'=>'t.m_time<NOW()-INTERVAL 12 HOUR',
+		));
+		if(count($models)>0){
+			$url='http://api.worldoftanks.ru/wot/clan/info/?'.http_build_query(array(
+				'application_id'=>Yii::app()->params['application_id'],
+				'language'=>'ru',
+				'clan_id'=>implode(',', array_keys($models)),
+			));
+			$urlHelper=new CUrlHelper();
+			if($urlHelper->execute($url)){
+				$data=json_decode($urlHelper->content, true);
+				if($data['status']=='ok'){
+					foreach ($data['data'] as $clanId=>$clanData){
+						$clan=$models[$clanId];
+						foreach ($clanData as $key=>$value){
+							$clan->$key=$value;
+						}
+					//	$clan->save(false);
+						$clan->setMembers($clanData['members']);
+					}
+				}
+			}
+		}
+	}
+	
+	public function setMembers($value)
+	{
+		CVarDumper::dump($value);
+		//$members=$this->members;
+/*		$sql=<<<SQL
+INSERT INTO wot_member(clan_id,account_id,created_at,role,updated_at)
+VALUES({values})
+ON DUPLICATE UPDATE created_at=values(created_at),role=values(role),updated_at=values(updated_at)
+SQL;
+		CVarDumper::dump($value);
+		if(is_array($value)){
+			
+			$values=array();
+			foreach ($value as $row){
+				$values[]='('.
+				implode('),(', array(
+					$row['clan_id'],
+					$row['account_id'],
+					date("'Y-m-d H:i:s'",$row['created_at']),
+					"'{$row['role']}'",
+					date("'Y-m-d H:i:s'",$row['updated_at']))
+				).')';
+			}
+			CVarDumper::dump($values);
+		}
+	*/
+	}
+	
+	public function setEmblems($value)
+	{
+		if(is_array($value)){
+			foreach ($value as $key=>$emblem){
+				$this->$key=$emblem;
+			}
+		}
+	}
+	
+	public function setPrivate($value)
+	{
+		if(is_array($value)){
+			CVarDumper::dump($value);
+		}
+	}
+}
