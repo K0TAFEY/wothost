@@ -178,17 +178,15 @@ SQL;
 SELECT wat.account_id, GROUP_CONCAT(wat.tank_id) tank_id
   FROM wot_account_tank wat
   JOIN wot_tank wt ON wat.tank_id = wt.tank_id AND wt.level=10
+  JOIN wot_account wa ON wat.account_id = wa.account_id
   JOIN wot_statistic ws ON wat.account_id = ws.account_id AND ws.statistic='clan'
-  JOIN (SELECT 
-    wa.account_id 
-    FROM wot_account wa
-    WHERE (wa.t_time IS NULL OR wa.t_time<NOW()-INTERVAL 1 WEEK) 
-    AND wa.last_battle_time>NOW()-INTERVAL 1 WEEK LIMIT 100) a ON a.account_id = wat.account_id
-  WHERE wat.battles>10
-  GROUP BY wat.account_id
+  WHERE (wa.t_time IS NULL OR wa.t_time<NOW()-INTERVAL 1 WEEK) AND wa.last_battle_time>NOW()-INTERVAL 1 WEEK 
+  GROUP BY wa.account_id HAVING SUM(wat.battles)>10
+  LIMIT 100
 SQL;
 		$statRows=array();
 		$rows=Yii::app()->db->createCommand($sqlQuery)->queryAll();
+	//	CVarDumper::dump($rows);
 		foreach ($rows as $row){
 			$account=WotAccount::model()->updateByPk($row['account_id'], array('t_time'=>new CDbExpression('now()')));
 			$url='http://api.worldoftanks.ru/wot/tanks/stats/?'.http_build_query(array(
