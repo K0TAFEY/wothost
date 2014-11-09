@@ -1,7 +1,9 @@
 <?php
 
-class WotProvinceNeighbor extends CActiveRecord
+class WotProvinceNeighbor extends EActiveRecord
 {
+	
+	public $onDuplicate=self::DUPLICATE_IGNORE;
 	
 	/**
 	 * 

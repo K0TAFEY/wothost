@@ -11,7 +11,7 @@ $config=require(dirname(__FILE__).'/common.php');
 $config=CMap::mergeArray($config,array(
 	'name'=>'Yii Demo',
 
-	'defaultController'=>'post',
+	'defaultController'=>'test',
 
 	// application components
 	'components'=>array(
@@ -30,6 +30,15 @@ $config=CMap::mergeArray($config,array(
 				'posts/<tag:.*?>'=>'post/index',
 				'<controller:\w+>/<action:\w+>'=>'<controller>/<action>',
 			),
+		),
+		'log'=>array(
+				'routes'=>array(
+						// uncomment the following to show log messages on web pages
+						array(
+								'class'=>'CWebLogRoute',
+								// 					/'levels'=>'trace',
+						),
+				),
 		),
 	),
 ));

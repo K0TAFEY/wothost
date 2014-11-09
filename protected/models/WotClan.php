@@ -26,20 +26,23 @@ class WotClan extends CActiveRecord
 		);
 	}
 	
+	public function behaviors()
+	{
+		return array(
+			'locale'=>'application.behaviors.CLocaleBehavior',
+		);
+	}
+	
 	protected function beforeSave()
 	{
 		if(parent::beforeSave()){
 			$this->m_time=new CDbExpression('now()');
-			if(is_numeric($this->created_at))
-				$this->created_at=date('Y-m-d H:i:s', $this->created_at);
-			if(is_numeric($this->updated_at))
-				$this->updated_at=date('Y-m-d H:i:s', $this->updated_at);
 			return true;
 		}
 		else
 			return false;
 	}
-	
+
 	/**
 	 * 
 	 * @param integer $clanId

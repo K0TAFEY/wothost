@@ -1,7 +1,9 @@
 <?php
 
-class WotClanProvince extends CActiveRecord
+class WotClanProvince extends EActiveRecord
 {
+	
+	public $onDuplicate=self::DUPLICATE_IGNORE;
 	
 	/**
 	 * 
@@ -15,5 +17,12 @@ class WotClanProvince extends CActiveRecord
 	public function tableName()
 	{
 		return 'wot_clan_province';
-	}	
+	}
+	
+	public function behaviors()
+	{
+		return array(
+			'locale'=>'application.behaviors.CLocaleBehavior'
+		);
+	} 
 }
