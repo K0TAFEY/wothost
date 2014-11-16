@@ -8,9 +8,10 @@
 
 date_default_timezone_set('Europe/Moscow');
 
-return array(
+return CMap::mergeArray(array(
 	'basePath'=>dirname(__FILE__).DIRECTORY_SEPARATOR.'..',
-		
+	'name'=>'Yii Blog Demo',
+
 	// preloading 'log' component
 	'preload'=>array('log'),
 
@@ -22,19 +23,17 @@ return array(
 
 	// application components
 	'components'=>array(
-		'db'=>require(dirname(__FILE__).'/db.php'),
-		'log'=>array(
-			'class'=>'CLogRouter',
-			'routes'=>array(
-				array(
-					'class'=>'CFileLogRoute',
-					'levels'=>'error, warning',
-				),
-			),
-		),
+		 'db'=>array(
+	 		'connectionString' => 'mysql:host=localhost;dbname=DBNAME',
+	 		'emulatePrepare' => true,
+	 		'username' => 'USERNAME',
+	 		'password' => 'PASSWORD',
+	 		'charset' => 'utf8',
+	 		'tablePrefix' => 'tbl_',
+		 ),
 	),
 
 	// application-level parameters that can be accessed
 	// using Yii::app()->params['paramName']
 	'params'=>require(dirname(__FILE__).'/params.php'),
-);
+),require(dirname(__FILE__).'/db.php'));
