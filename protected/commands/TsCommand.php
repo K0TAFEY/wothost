@@ -12,7 +12,7 @@ class TsCommand extends CConsoleCommand
 		foreach ($clientList as $client){
 			if(((string)$client['client_platform'])!='ServerQuery'){
 				$info =$client->getInfo();
-				$client->addServerGroup($ts3->serverGroupGetByName('admin')->getId());
+				$client->addServerGroup($ts3->serverGroupGetByName('Server Admin')->getId());
 				CVarDumper::dump($info);
 			}
 		}
