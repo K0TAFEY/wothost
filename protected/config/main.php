@@ -32,13 +32,13 @@ $config=CMap::mergeArray($config,array(
 			),
 		),
 		'log'=>array(
-				'routes'=>array(
-						// uncomment the following to show log messages on web pages
-						array(
-								'class'=>'CWebLogRoute',
-								// 					/'levels'=>'trace',
-						),
+			'routes'=>array(
+				// uncomment the following to show log messages on web pages
+				array(
+					'class'=>'CWebLogRoute',
+					// 'levels'=>'trace',
 				),
+			),
 		),
 	),
 ));
