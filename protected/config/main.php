@@ -32,6 +32,7 @@ $config=CMap::mergeArray($config,array(
 			),
 		),
 		'log'=>array(
+			'class'=>'CLogRouter',
 			'routes'=>array(
 				// uncomment the following to show log messages on web pages
 				array(
