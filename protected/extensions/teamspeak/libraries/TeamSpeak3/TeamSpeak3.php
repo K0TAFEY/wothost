@@ -544,7 +544,8 @@ class TeamSpeak3
 
     if(!class_exists("TeamSpeak3_Helper_Profiler", false))
     {
-      spl_autoload_register(array(__CLASS__, "autoload"));
+    	Yii::registerAutoloader(array(__CLASS__, "autoload"), true);
+     // spl_autoload_register(array(__CLASS__, "autoload"));
     }
 
     TeamSpeak3_Helper_Profiler::start();
