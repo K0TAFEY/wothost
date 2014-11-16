@@ -542,7 +542,7 @@ class TeamSpeak3
       throw new LogicException("autoload functions are not available in this PHP installation");
     }
 
-    if(!class_exists("TeamSpeak3_Helper_Profiler"))
+    if(!class_exists("TeamSpeak3_Helper_Profiler", false))
     {
       spl_autoload_register(array(__CLASS__, "autoload"));
     }
