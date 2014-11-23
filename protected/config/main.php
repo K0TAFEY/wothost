@@ -26,6 +26,7 @@ $config=CMap::mergeArray($config,array(
 		'urlManager'=>array(
 			'urlFormat'=>'path',
 			'rules'=>array(
+				'http://<clan:\w+>.wothost.ru/<controller:\w+>/<action:\w+>' => '<controller>/<action>',
 				'post/<id:\d+>/<title:.*?>'=>'post/view',
 				'posts/<tag:.*?>'=>'post/index',
 				'<controller:\w+>/<action:\w+>'=>'<controller>/<action>',
