@@ -1,12 +1,6 @@
 <?php
 
-// uncomment the following to define a path alias
-// Yii::setPathOfAlias('local','path/to/local-folder');
-
-// This is the main Web application configuration. Any writable
-// CWebApplication properties can be configured here.
-
-$config=require(dirname(__FILE__).'/common.php');
+$config=require(dirname(__FILE__).'/main.php');
 
 $config=CMap::mergeArray($config,array(
 	'name'=>'Yii Demo',
