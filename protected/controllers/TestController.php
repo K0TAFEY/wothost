@@ -4,7 +4,7 @@ class TestController extends CController
 	public function actionIndex()
 	{
 		echo '<pre>';
-		CVarDumper::dump($_GET);
+		CVarDumper::dump($_SERVER);
 	//	WotProvince::scan('globalmap');
 	//	phpinfo();
 	}
