@@ -5,6 +5,7 @@ class TestController extends CController
 	{
 		echo '<pre>';
 		CVarDumper::dump($_SERVER);
+		CVarDumper::dump(isset($_SERVER['SUBDOMAIN']));
 	//	WotProvince::scan('globalmap');
 	//	phpinfo();
 	}
