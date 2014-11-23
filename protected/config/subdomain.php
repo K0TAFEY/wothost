@@ -1,6 +1,6 @@
 <?php
 
-$config=require(dirname(__FILE__).'/common.php');
+$config=require(dirname(__FILE__).'/main.php');
 
 $config=CMap::mergeArray($config,array(
 	'name'=>'Yii Demo',
