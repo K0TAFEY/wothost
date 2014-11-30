@@ -5,7 +5,7 @@ $config=require(dirname(__FILE__).'/common.php');
 $config=CMap::mergeArray($config,array(
 	'name'=>'Yii Demo',
 
-	'defaultController'=>'test',
+	'defaultController'=>'intro',
 
 	// application components
 	'components'=>array(
@@ -16,6 +16,9 @@ $config=CMap::mergeArray($config,array(
 		'errorHandler'=>array(
 			// use 'site/error' action to display errors
 			'errorAction'=>'site/error',
+		),
+		'clientScript' => array(
+			'packages' =>require __DIR__.'/packages.php',
 		),
 		'urlManager'=>array(
 			'urlFormat'=>'path',
