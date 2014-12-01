@@ -39,7 +39,7 @@
 </head>
 <!-- END HEAD -->
 <!-- BEGIN BODY -->
-<body class="page-header-fixed page-boxed">
+<body class="page-header-fixed page-boxed page-sidebar-reversed">
 <!-- BEGIN HEADER -->
 <div class="header navbar  navbar-fixed-top">
 	<!-- BEGIN TOP NAVIGATION BAR -->
