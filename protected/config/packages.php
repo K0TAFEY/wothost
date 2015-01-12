@@ -55,6 +55,10 @@ return array(
 		'js'=>array('jquery.uniform.min.js'),
 		'css'=>array('css/uniform.default.min.css'),
 	),
+	'simple-line-icons'=>array(
+			'basePath'=>'ext.clientscript.simple-line-icons',
+			'css'=>array('simple-line-icons.min.css'),
+	),
 	'data-tables'=>array(
 		'basePath'=>'ext.clientscript.data-tables',
 		'js'=>array('media/js/jquery.dataTables.min.js','bootstrap/3/dataTables.bootstrap.js'),
