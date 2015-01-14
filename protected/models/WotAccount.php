@@ -166,8 +166,8 @@ SQL;
 		if($urlHelper->execute($url)){
 			$data=CJSON::decode($urlHelper->content);
 			if($data['status']=='ok'){
-				if(isset($data['data'][$row['account_id']])){
-					$statData=$data['data'][$row['account_id']];
+				if(isset($data['data'][$this->account_id])){
+					$statData=$data['data'][$this->account_id];
 					$sql='INSERT INTO wothost.wot_account_tank_statistic(account_id,tank_id,statistic,battle_avg_xp,battles,capture_points,damage_dealt,damage_received,draws,dropped_capture_points,frags,hits,hits_percents,losses,shots,spotted,survived_battles,wins,xp)';
 					$sql.='VALUES(';
 					$values=array();
