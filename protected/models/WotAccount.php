@@ -158,7 +158,7 @@ SQL;
 		$url='http://api.worldoftanks.ru/wot/tanks/stats/?'.http_build_query(array(
 				'application_id'=>Yii::app()->params['application_id'],
 				'language'=>'ru',
-				'account_id'=>$row['account_id'],
+				'account_id'=>$this->account_id,
 				'tank_id'=>implode(',', WotTank::get10lIds()),
 				'fields'=>'account_id,max_frags,max_xp,tank_id,all,clan',
 		));
