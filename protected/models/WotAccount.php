@@ -48,7 +48,7 @@ SQL;
 			$url='http://api.worldoftanks.ru/wot/account/info/?'.http_build_query(array(
 					'application_id'=>Yii::app()->params['application_id'],
 					'language'=>'ru',
-					'fields'=>'account_id,clan_id,created_at,global_rating,last_battle_time,logout_at,nickname,updated_at,statistics',
+					'fields'=>'account_id,clan_id,created_at,global_rating,last_battle_time,logout_at,nickname,updated_at,statistics.all, statistics.clan',
 					'account_id'=>implode(',', $accountIds),
 			));
 			$urlHelper=new CUrlHelper();
@@ -83,7 +83,7 @@ SQL;
 		$fields=array_keys(WotStatistic::model()->metaData->columns);
 		$sql='INSERT INTO wot_statistic('.implode(',', $fields).') VALUES';
 		$rows=array();
-		foreach (array('all','clan','company','historical', 'team') as $stat){
+		foreach (array('all','clan') as $stat){ //,'company','historical', 'team'
 			if(isset($value[$stat])){
 				$data=$value[$stat];
 				$values=array();
