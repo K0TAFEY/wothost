@@ -153,7 +153,7 @@ SQL;
 		$accountIds=implode(',', $accountIds);
 		$sql=<<<SQL
 UPDATE wot_member wm SET wm.escaped_at = UNIX_TIMESTAMP()
-  WHERE wm.clan_id=:clan AND wm.escaped_at IS NULL AND wm.account_id IN ($accountIds)
+  WHERE wm.clan_id=:clan AND wm.escaped_at IS NULL AND wm.account_id NOT IN ($accountIds)
 SQL;
 		Yii::app()->db->createCommand($sql)->execute(array('clan'=>$this->clan_id));
 	}
