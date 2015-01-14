@@ -69,6 +69,7 @@ SQL;
 			if($urlHelper->execute($url)){
 				$data=CJSON::decode($urlHelper->content);
 				if($data['status']=='ok'){
+					$tran=Yii::app()->db->beginTransaction();
 					foreach ($data['data'] as $clanId=>$clanData){
 						self::ensureClanId($clanId);
 						if(is_array($clanData)){
@@ -81,6 +82,7 @@ SQL;
 							$clan->setMembers($clanData['members']);
 						}						
 					}
+					$tran->commit();
 				}
 			}
 		}
