@@ -135,7 +135,7 @@ SQL;
 							foreach ($accountData as $tankData){
 								$values[]=implode(',', array(
 										$accountId,
-										$tankData['tank_id'],
+										WotTank::ensureTankId($tankData['tank_id']),
 										$tankData['mark_of_mastery'],
 										$tankData['statistics']['wins'],
 										$tankData['statistics']['battles'],
