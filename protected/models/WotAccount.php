@@ -19,13 +19,6 @@ class WotAccount extends CActiveRecord
 		return 'wot_account';
 	}
 	
-	public function behaviors()
-	{
-		return array(
-			'timestamp'=>'application.behaviors.CTimestampBehavior',
-		);
-	}
-	
 	protected function beforeSave()
 	{
 		if(parent::beforeSave()){
@@ -36,40 +29,43 @@ class WotAccount extends CActiveRecord
 			return false;
 	}
 	
-	public static function scan()
+	public static function ensureAccountId($accountId)
 	{
-		$sql=<<<SQL
+		static $command;
+		if(empty($command)){
+			$sql=<<<SQL
 INSERT IGNORE INTO wot_account(account_id)
-  SELECT wm.account_id FROM wot_member wm
+VALUES(:accountId)
 SQL;
-		Yii::app()->db->createCommand($sql)->execute();
-		$models=WotAccount::model()->findAll(array(
-			'condition'=>'t.m_time IS NULL OR t.m_time<now()-INTERVAL 2 DAY',
-			'limit'=>100,
-			'index'=>'account_id'
-		));
-		if(count($models)>0){
+			$command=Yii::app()->db->createCommand($sql);
+		}
+		$command->execute(compact('accountId'));
+	}
+	
+	public static function scan($accountIds)
+	{
+		if(count($accountIds)>0){
 			$url='http://api.worldoftanks.ru/wot/account/info/?'.http_build_query(array(
 					'application_id'=>Yii::app()->params['application_id'],
 					'language'=>'ru',
-					'fields'=>'account_id,last_battle_time,created_at,updated_at,global_rating,clan_id,nickname,logout_at,statistics',
-					'account_id'=>implode(',', array_keys($models)),
+					'fields'=>'account_id,clan_id,created_at,global_rating,last_battle_time,logout_at,nickname,updated_at,statistics',
+					'account_id'=>implode(',', $accountIds),
 			));
 			$urlHelper=new CUrlHelper();
 			if($urlHelper->execute($url)){
-				$data=json_decode($urlHelper->content, true);
+				$data=CJSON::decode($urlHelper->content);
 			//	CVarDumper::dump($data);
 				if($data['status']=='ok'){
 					foreach ($data['data'] as $accountId=>$accountData){
-						$accout=$models[$accountId];
+						WotAccount::ensureAccountId($accountId);
 						if(is_array($accountData)){
+							$accout=new WotAccount();
+							$accout->setIsNewRecord(false);
 							foreach ($accountData as $key=>$value){
 								$accout->$key=$value;
 							}
-							$accout->save(false);
+							$accout->update();
 						}
-						else
-							$accout->save(false);
 					}
 				}
 			}
@@ -87,7 +83,7 @@ SQL;
 		$fields=array_keys(WotStatistic::model()->metaData->columns);
 		$sql='INSERT INTO wot_statistic('.implode(',', $fields).') VALUES';
 		$rows=array();
-		foreach (array('all','clan','company','historical') as $stat){
+		foreach (array('all','clan','company','historical', 'team') as $stat){
 			if(isset($value[$stat])){
 				$data=$value[$stat];
 				$values=array();

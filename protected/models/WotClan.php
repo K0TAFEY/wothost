@@ -22,7 +22,7 @@ class WotClan extends CActiveRecord
 	public function relations()
 	{
 		return array(
-			'members'=>array(self::HAS_MANY, 'WotMember', 'clan_id', 'index'=>'account_id'),
+			'members'=>array(self::HAS_MANY, 'WotMember', 'clan_id', 'index'=>'account_id', 'on'=>'members.escaped_at IS NULL'),
 		);
 	}
 	
@@ -45,11 +45,15 @@ class WotClan extends CActiveRecord
 
 	public static function ensureClanId($clanId)
 	{
-		$sql=<<<SQL
+		static $command;
+		if(empty($command)){
+			$sql=<<<SQL
 INSERT IGNORE INTO wot_clan(clan_id)
-VALUES($clanId)
+VALUES(:clanId)
 SQL;
-		Yii::app()->db->createCommand($sql)->execute();
+			$command=Yii::app()->db->createCommand($sql);
+		}
+		$command->execute(compact('clanId'));
 	}
 	
 	/**
