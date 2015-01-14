@@ -171,6 +171,7 @@ SQL;
 					$sql='INSERT INTO wothost.wot_account_tank_statistic(account_id,tank_id,statistic,battle_avg_xp,battles,capture_points,damage_dealt,damage_received,draws,dropped_capture_points,frags,hits,hits_percents,losses,shots,spotted,survived_battles,wins,xp)';
 					$sql.='VALUES(';
 					$values=array();
+					$tran=Yii::app()->db->beginTransaction();
 					foreach ($statData as $tankStat){
 						WotAccountTank::model()->updateByPk(array('account_id'=>$tankStat['account_id'],'tank_id'=>$tankStat['tank_id']), array(
 							'max_frags'=>$tankStat['max_frags'],
@@ -203,8 +204,10 @@ SQL;
 							}
 						}
 					}
+					$tran->commit();
 					$sql.=implode(').(', $values).')';
 					$sql.='ON DUPLICATE KEY UPDATE battle_avg_xp=VALUES(battle_avg_xp),battles=VALUES(battles),capture_points=VALUES(capture_points),damage_dealt=VALUES(damage_dealt),damage_received=VALUES(damage_received),draws=VALUES(draws),dropped_capture_points=VALUES(dropped_capture_points),frags=VALUES(frags),hits=VALUES(hits),hits_percents=VALUES(hits_percents),losses=VALUES(losses),shots=VALUES(shots),spotted=VALUES(spotted),survived_battles=VALUES(survived_battles),wins=VALUES(wins),xp=VALUES(xp)';
+					Yii::app()->db->createCommand($sql)->execute();
 				}
 			}
 		}
