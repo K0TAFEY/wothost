@@ -7,8 +7,8 @@ class ClanController extends CController
 		$clan=WotClan::model()->findByPk($id);
 	//	WotAccount::scan(array_keys($clan->members));
 	//	WotAccount::scanTanks(array_keys($clan->members));
-		foreach ($clan->members as $member){
-			$member->scanTanksStat();
+		foreach ($clan->accounts as $account){
+			$account->scanTanksStat();
 		}
 	}
 }
