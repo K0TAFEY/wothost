@@ -65,6 +65,7 @@ SQL;
 					'language'=>'ru',
 					'clan_id'=>implode(',', array_keys($clanIds)),
 			));
+			echo $url;
 			$urlHelper=new CUrlHelper();
 			if($urlHelper->execute($url)){
 				echo $urlHelper->content;
