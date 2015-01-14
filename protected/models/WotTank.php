@@ -61,7 +61,7 @@ class WotTank extends CActiveRecord
 					));
 				}
 				$sql.=implode('),(', $values).')';
-				$sql.='ON DUPLICATE KEY UPDATE is_premium=:is_premium,level=:level,name=:name,nation=:nation,type=:type,short_name_i18n=:short_name_i18n,name_i18n=:name_i18n,image=:image,image_small=:image_small,contour_image=:contour_image;';
+				$sql.='ON DUPLICATE KEY UPDATE is_premium=VALUES(is_premium),level=VALUES(level),name=VALUES(name),nation=VALUES(nation),type=VALUES(type),short_name_i18n=VALUES(short_name_i18n),name_i18n=VALUES(name_i18n),image=VALUES(image),image_small=VALUES(image_small),contour_image=VALUES(contour_image);';
 				Yii::app()->db->createCommand($sql)->execute();
 			}
 		}
