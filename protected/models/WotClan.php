@@ -63,12 +63,10 @@ SQL;
 			$url='http://api.worldoftanks.ru/wot/clan/info/?'.http_build_query(array(
 					'application_id'=>Yii::app()->params['application_id'],
 					'language'=>'ru',
-					'clan_id'=>implode(',', array_keys($clanIds)),
+					'clan_id'=>implode(',', $clanIds),
 			));
-			echo $url;
 			$urlHelper=new CUrlHelper();
 			if($urlHelper->execute($url)){
-				echo $urlHelper->content;
 				$data=CJSON::decode($urlHelper->content);
 				echo '<pre>';
 				CVarDumper::dump($data);
