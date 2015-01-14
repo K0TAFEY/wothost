@@ -171,7 +171,11 @@ SQL;
 					$sql='INSERT INTO wothost.wot_account_tank_statistic(account_id,tank_id,statistic,battle_avg_xp,battles,capture_points,damage_dealt,damage_received,draws,dropped_capture_points,frags,hits,hits_percents,losses,shots,spotted,survived_battles,wins,xp)';
 					$sql.='VALUES(';
 					$values=array();
-					foreach ($statData as $tankStat){						
+					foreach ($statData as $tankStat){
+						WotAccountTank::model()->updateByPk(array('account_id'=>$tankStat['account_id'],'tank_id'=>$tankStat['tank_id']), array(
+							'max_frags'=>$tankStat['max_frags'],
+							'max_xp'=>$tankStat['max_xp'],
+						));					
 						foreach (array('all','clan') as $statistic){
 							if(isset($tankStat[$statistic])){
 								$statRow=$tankStat[$statistic];
