@@ -68,8 +68,6 @@ SQL;
 			$urlHelper=new CUrlHelper();
 			if($urlHelper->execute($url)){
 				$data=CJSON::decode($urlHelper->content);
-				echo '<pre>';
-				CVarDumper::dump($data);
 				if($data['status']=='ok'){
 					foreach ($data['data'] as $clanId=>$clanData){
 						self::ensureClanId($clanId);
