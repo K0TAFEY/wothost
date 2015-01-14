@@ -116,49 +116,36 @@ SQL;
 		Yii::app()->db->createCommand($sql)->execute();
 	}
 	
-	public static function scanTanks()
+	public static function scanTanks($accountIds)
 	{
-		$sql=<<<SQL
-INSERT IGNORE INTO wot_account_tank(account_id,tank_id,mark_of_mastery,wins,battles)
-VALUES(:account_id,:tank_id,:mark_of_mastery,:wins,:battles)
-ON DUPLICATE KEY UPDATE mark_of_mastery=:mark_of_mastery,wins=:wins,battles=:battles;
-SQL;
-		$models=WotAccount::model()->findAll(array(
-				'condition'=>'t.s_time IS NULL OR t.s_time<now()-INTERVAL 12 HOUR',
-				'limit'=>100,
-				'index'=>'account_id'
-		));
-		if(count($models)>0){
+		if(count($accountIds)>0){
 			$url='http://api.worldoftanks.ru/wot/account/tanks/?'.http_build_query(array(
 					'application_id'=>Yii::app()->params['application_id'],
 					'language'=>'ru',
-					'account_id'=>implode(',', array_keys($models)),
+					'account_id'=>implode(',', $accountIds),
 			));
 			$urlHelper=new CUrlHelper();
 			if($urlHelper->execute($url)){
-				$cmd=Yii::app()->db->createCommand($sql);
 				$data=json_decode($urlHelper->content, true);
 				if($data['status']=='ok'){
-					$cmd=Yii::app()->db->createCommand($sql);
-					$tran=Yii::app()->db->beginTransaction();
+					$sql='INSERT INTO wot_account_tank(account_id,tank_id,mark_of_mastery,wins,battles)VALUES(';
+					$values=array();
 					foreach ($data['data'] as $accountId=>$accountData){
-						//CVarDumper::dump($accountData);
-						$accout=$models[$accountId];
-						$accout->s_time=new CDbExpression('now()');
 						if(is_array($accountData)){
 							foreach ($accountData as $tankData){
-								$cmd->execute(array(
-									'account_id'=>$accout->account_id,
-									'tank_id'=>$tankData['tank_id'],
-									'mark_of_mastery'=>$tankData['mark_of_mastery'],
-									'wins'=>$tankData['statistics']['wins'],
-									'battles'=>$tankData['statistics']['battles'],
+								$values[]=implode(',', array(
+										$accountId,
+										$tankData['tank_id'],
+										$tankData['mark_of_mastery'],
+										$tankData['statistics']['wins'],
+										$tankData['statistics']['battles'],
 								));
 							}
 						}
-						$accout->save(false);
 					}
-					$tran->commit();
+					$sql.=implode('),(', $values).')';
+					$sql.='ON DUPLICATE KEY UPDATE mark_of_mastery=VALUES(mark_of_mastery),wins=VALUES(wins),battles=VALUES(battles)';
+					Yii::app()->db->createCommand($sql)->execute();
 				}
 			}
 			else
