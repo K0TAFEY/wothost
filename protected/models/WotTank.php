@@ -22,12 +22,12 @@ class WotTank extends CActiveRecord
 	public static function ensureTankId($tankId)
 	{		
 		if(empty(self::$_ids)){
-			$keys=array_keys(self::model()->findAll(array('index'=>'tank_id')))
+			$keys=array_keys(self::model()->findAll(array('index'=>'tank_id')));
 			self::$_ids=array_combine($keys, $keys);
 		}
 		if(!isset(self::$_ids[$tankId])){
 			self::scan();
-			$keys=array_keys(self::model()->findAll(array('index'=>'tank_id')))
+			$keys=array_keys(self::model()->findAll(array('index'=>'tank_id')));
 			self::$_ids=array_combine($keys, $keys);
 		}
 		return self::$_ids[$tankId]=$tankId;
@@ -50,14 +50,14 @@ class WotTank extends CActiveRecord
 							$value['tank_id'],
 							($value['is_premium']=='true')?1:0,
 							$value['level'],
-							"'$value['name']'",
-							"'$value['nation']'",
-							"'$value['type']'",
-							"'$value['short_name_i18n']'",
-							"'$value['name_i18n']'",
-							"'$value['image']'",
-							"'$value['image_small']'",
-							"'$value['contour_image']'",
+							"'{$value['name']}'",
+							"'{$value['nation']}'",
+							"'{$value['type']}'",
+							"'{$value['short_name_i18n']}'",
+							"'{$value['name_i18n']}'",
+							"'{$value['image']}'",
+							"'{$value['image_small']}'",
+							"'{$value['contour_image']}'",
 					));
 				}
 				$sql.=implode('),(', $values).')';
