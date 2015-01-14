@@ -56,6 +56,7 @@ SQL;
 				$data=CJSON::decode($urlHelper->content);
 			//	CVarDumper::dump($data);
 				if($data['status']=='ok'){
+					$tran=Yii::app()->db->beginTransaction();
 					foreach ($data['data'] as $accountId=>$accountData){
 						WotAccount::ensureAccountId($accountId);
 						if(is_array($accountData)){
@@ -67,6 +68,7 @@ SQL;
 							$accout->update();
 						}
 					}
+					$tran->commit();
 				}
 			}
 			else
