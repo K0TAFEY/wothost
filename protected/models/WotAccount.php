@@ -205,7 +205,7 @@ SQL;
 						}
 					}
 					$tran->commit();
-					$sql.=implode(').(', $values).')';
+					$sql.=implode('),(', $values).')';
 					$sql.='ON DUPLICATE KEY UPDATE battle_avg_xp=VALUES(battle_avg_xp),battles=VALUES(battles),capture_points=VALUES(capture_points),damage_dealt=VALUES(damage_dealt),damage_received=VALUES(damage_received),draws=VALUES(draws),dropped_capture_points=VALUES(dropped_capture_points),frags=VALUES(frags),hits=VALUES(hits),hits_percents=VALUES(hits_percents),losses=VALUES(losses),shots=VALUES(shots),spotted=VALUES(spotted),survived_battles=VALUES(survived_battles),wins=VALUES(wins),xp=VALUES(xp)';
 					Yii::app()->db->createCommand($sql)->execute();
 				}
