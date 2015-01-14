@@ -219,4 +219,81 @@ SQL;
 		else
 			throw new CException($urlHelper->errorMessage);
 	}
+	
+	public static function calcEffect($accountIds)
+	{
+		if(count($accountIds)>0){
+			$accountIds=implode(',', $accountIds);
+			$sql=<<<SQL
+UPDATE wot_account wa
+  JOIN 
+(SELECT 
+  ws.account_id, 
+  (1240-1040/POWER(LEAST(a.midl,6),0.164))*ws.frags/ws.battles
+  +ws.damage_dealt/ws.battles*530/(184*EXP(0.24*a.midl)+130)
+  +ws.spotted/ws.battles*125
+  +LEAST(ws.dropped_capture_points/ws.battles,2.2)*100
+  +((185/(0.17+EXP((ws.wins/ws.battles*100-35)*-0.134)))-500)*0.45
+  +(6-LEAST(a.midl,6))*-60 wn6,
+
+  (1240-1040/POWER(LEAST(a.midl,6),0.164))*ws.frags/ws.battles
+  +ws.damage_dealt/ws.battles*530/(184*EXP(0.24*a.midl)+130)
+  +ws.spotted/ws.battles*125*LEAST(a.midl,3)/3
+  +LEAST(ws.dropped_capture_points/ws.battles,2.2)*100
+  +((185/(0.17+EXP((ws.wins/ws.battles*100-35)*-0.134)))-500)*0.45
+  -((5-LEAST(a.midl,5))*125)/(1+EXP((a.midl-POWER(ws.battles/220,3/a.midl))*1.5)) wn7,
+       
+  ws.damage_dealt/ws.battles*(10/(a.midl+2))*(0.23+2*a.midl/100)
+  +250*ws.frags/ws.battles
+  +ws.spotted/ws.battles*150
+  +log(1.732,ws.capture_points/ws.battles+1)*150
+  +ws.dropped_capture_points/ws.battles*150 effect,
+  
+  980*a.rDAMAGEc + 210*a.rDAMAGEc*a.rFRAGc + 155*a.rFRAGc*a.rSPOTc + 75*a.rDEFc*a.rFRAGc + 145*LEAST(1.8,a.rWINc) wn8,
+
+  LN(ws.battles)/10*(ws.xp/ws.battles+ws.damage_dealt/ws.battles*(
+    2*ws.wins/ws.battles+
+    0.9*ws.frags/ws.battles+
+    0.5*ws.spotted/ws.battles+
+    0.5*ws.capture_points/ws.battles+
+    0.5*ws.dropped_capture_points/ws.battles)
+  ) bronesite
+
+  FROM wot_statistic ws
+  JOIN (SELECT
+      wat.account_id,
+      SUM(wt.level * wat.battles)/sum(wat.battles) midl,
+      GREATEST(0,(ws.damage_dealt/SUM(etv.dmg*wat.battles)-0.22)/(1-0.22)) rDAMAGEc,
+      GREATEST(0,LEAST(ws.damage_dealt/SUM(etv.dmg*wat.battles)+0.2,(ws.frags/SUM(etv.frag*wat.battles)-0.12)/(1-0.12))) rFRAGc,
+      GREATEST(0,LEAST(ws.damage_dealt/SUM(etv.dmg*wat.battles)+0.1,(ws.spotted/SUM(etv.spot*wat.battles)-0.38)/(1-0.38))) rSPOTc,
+      GREATEST(0,LEAST(ws.damage_dealt/SUM(etv.dmg*wat.battles)+0.1,(ws.dropped_capture_points/SUM(etv.def*wat.battles)-0.10)/(1-0.10))) rDEFc,
+      GREATEST(0,(ws.wins/SUM(etv.win/100*wat.battles)-0.71)/(1-0.71)) rWINc
+    FROM wot_account_tank wat
+    JOIN wot_statistic ws ON ws.account_id = wat.account_id AND ws.statistic='all'
+    JOIN wot_tank wt ON wt.tank_id = wat.tank_id
+    LEFT JOIN wot_wn8_etv etv ON etv.IDNum=wat.tank_id
+    WHERE wat.account_id IN ($accountIds)
+    GROUP BY wat.account_id) a ON a.account_id = ws.account_id
+    WHERE ws.statistic='all') a ON a.account_id=wa.account_id
+  LEFT JOIN 
+  (SELECT a.account_id, a.om*POWER(a.wp,3)*POWER(a.frags,2)*POWER(a.hp,2)*100/7.5383 ivanerr
+    FROM
+  (SELECT wa.account_id, wa.nickname, SUM(wt.ivanerr_kef)*100/1550 om,
+    SUM(CASE WHEN wat.battles>300 THEN wat.wins*300/wat.battles ELSE wat.wins END/CASE WHEN wat.battles<300 THEN wat.battles ELSE 300 END)/SUM(wt.ivanerr_kef) wp,
+    SUM(ws.frags)/SUM(ws.battles) frags,
+  --  SUM(wpts.frags)/SUM(wpts.battles) frags,
+    SUM(CASE WHEN ws.battles>1000 THEN ws.hits_percents ELSE 0 END)/SUM(CASE WHEN ws.battles>1000 THEN 1 ELSE 0 END)/100 hp
+    FROM wot_account wa
+    JOIN wot_statistic ws ON wa.account_id = ws.account_id AND ws.statistic = 'all'
+    JOIN wot_account_tank wat ON wa.account_id = wat.account_id
+  --  JOIN wot_player_tank_statistic wpts ON wpt.player_id = wpts.player_id AND wpt.tank_id = wpts.tank_id AND wpts.statistic_id = 1
+    JOIN wot_tank wt ON wat.tank_id = wt.tank_id AND wt.level=10
+    WHERE wa.account_id IN ($accountIds)
+    GROUP BY wa.account_id
+    ) a) ivanerr ON ivanerr.account_id=wa.account_id
+  SET wa.wn6=a.wn6, wa.wn7=a.wn7, wa.wn8=a.wn8, wa.effect=a.effect, wa.armor=a.bronesite, wa.ivanerr=ivanerr.ivanerr
+SQL;
+			Yii::app()->db->createCommand($sql)->execute();
+		}
+	}
 }
