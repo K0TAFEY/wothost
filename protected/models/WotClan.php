@@ -67,6 +67,7 @@ SQL;
 			));
 			$urlHelper=new CUrlHelper();
 			if($urlHelper->execute($url)){
+				echo $urlHelper->content;
 				$data=CJSON::decode($urlHelper->content);
 				echo '<pre>';
 				CVarDumper::dump($data);
