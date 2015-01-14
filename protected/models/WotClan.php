@@ -127,9 +127,9 @@ SQL;
 	//	CVarDumper::dump($value);
 		//$members=$this->members;
 		$sql=<<<SQL
-INSERT INTO wot_member(clan_id,account_id,created_at,role)
+INSERT INTO wot_member(clan_id,account_id,created_at,role_id)
 VALUES{values}
-ON DUPLICATE KEY UPDATE role=values(role), escaped_at=null
+ON DUPLICATE KEY UPDATE role_id=values(role_id), escaped_at=null
 SQL;
 	//	CVarDumper::dump($value);
 		$accountIds=array();
