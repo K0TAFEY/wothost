@@ -5,6 +5,8 @@ class WotTank extends CActiveRecord
 	
 	private static $_ids;
 	
+	private static $_10l;
+	
 	/**
 	 * 
 	 * @return WotTank
@@ -65,5 +67,15 @@ class WotTank extends CActiveRecord
 				Yii::app()->db->createCommand($sql)->execute();
 			}
 		}
-	}	
+	}
+	
+	public static function get10lIds()
+	{
+		if(empty(self::$_10l))
+			self::$_10l=array_keys(self::model()->findAll(array(
+					'condition'=>'level=10',
+					'index'=>'tank_id',
+			)));
+		return self::$_10l;
+	}
 }

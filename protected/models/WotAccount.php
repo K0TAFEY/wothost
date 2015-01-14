@@ -153,65 +153,58 @@ SQL;
 		}
 	}
 	
-	public static function scanStat()
+	public function scanTankStat()
 	{
-		$fieldNames=array_keys(WotAccountTankStatistic::model()->metaData->columns);
-		
-		$sqlInsert="INSERT INTO wot_account_tank_statistic(".implode(',', $fieldNames).")VALUES";
-		
-		$sqlQuery=<<<SQL
-SELECT wat.account_id, GROUP_CONCAT(wat.tank_id) tank_id
-  FROM wot_account_tank wat
-  JOIN wot_tank wt ON wat.tank_id = wt.tank_id AND wt.level=10
-  JOIN wot_account wa ON wat.account_id = wa.account_id
-  JOIN wot_statistic ws ON wat.account_id = ws.account_id AND ws.statistic='clan'
-  WHERE (wa.t_time IS NULL OR wa.t_time<NOW()-INTERVAL 1 WEEK) AND wa.last_battle_time>NOW()-INTERVAL 1 WEEK 
-  GROUP BY wa.account_id HAVING SUM(wat.battles)>10
-  LIMIT 100
-SQL;
-		$statRows=array();
-		$rows=Yii::app()->db->createCommand($sqlQuery)->queryAll();
-	//	CVarDumper::dump($rows);
-		foreach ($rows as $row){
-			$account=WotAccount::model()->updateByPk($row['account_id'], array('t_time'=>new CDbExpression('now()')));
-			$url='http://api.worldoftanks.ru/wot/tanks/stats/?'.http_build_query(array(
-					'application_id'=>Yii::app()->params['application_id'],
-					'language'=>'ru',
-					'account_id'=>$row['account_id'],
-					'tank_id'=>$row['tank_id'],
-			));
-			$urlHelper=new CUrlHelper();
-			if($urlHelper->execute($url)){
-				$data=json_decode($urlHelper->content, true);
-				if($data['status']=='ok'){
-					if(isset($data['data'][$row['account_id']])){
-						$statData=$data['data'][$row['account_id']];
-						foreach ($statData as $tankStat){						
-							foreach (array('all','clan', 'company', 'historical') as $statistic){
-								if(isset($tankStat[$statistic])){
-									$statRow=$tankStat[$statistic];
-									$statRow['account_id']=$tankStat['account_id'];
-									$statRow['tank_id']=$tankStat['tank_id'];
-									$statRow['statistic']="'$statistic'";
-									$statRows[]='('.implode(',', CMap::mergeArray(array_flip($fieldNames), $statRow)).')';
-								}
+		$url='http://api.worldoftanks.ru/wot/tanks/stats/?'.http_build_query(array(
+				'application_id'=>Yii::app()->params['application_id'],
+				'language'=>'ru',
+				'account_id'=>$row['account_id'],
+				'tank_id'=>implode(',', WotTank::get10lIds()),
+				'fields'=>'account_id,max_frags,max_xp,tank_id,all,clan',
+		));
+		$urlHelper=new CUrlHelper();
+		if($urlHelper->execute($url)){
+			$data=CJSON::decode($urlHelper->content);
+			if($data['status']=='ok'){
+				if(isset($data['data'][$row['account_id']])){
+					$statData=$data['data'][$row['account_id']];
+					$sql='INSERT INTO wothost.wot_account_tank_statistic(account_id,tank_id,statistic,battle_avg_xp,battles,capture_points,damage_dealt,damage_received,draws,dropped_capture_points,frags,hits,hits_percents,losses,shots,spotted,survived_battles,wins,xp)';
+					$sql.='VALUES(';
+					$values=array();
+					foreach ($statData as $tankStat){						
+						foreach (array('all','clan') as $statistic){
+							if(isset($tankStat[$statistic])){
+								$statRow=$tankStat[$statistic];
+								$values[]=implode(',', array(
+										$tankStat['account_id'],
+										$tankStat['tank_id'],
+										"'$statistic'",
+										$statRow['battle_avg_xp'],
+										$statRow['battles'],
+										$statRow['capture_points'],
+										$statRow['damage_dealt'],
+										$statRow['damage_received'],
+										$statRow['draws'],
+										$statRow['dropped_capture_points'],
+										$statRow['frags'],
+										$statRow['hits'],
+										$statRow['hits_percents'],
+										$statRow['losses'],
+										$statRow['shots'],
+										$statRow['spotted'],
+										$statRow['survived_battles'],
+										$statRow['wins'],
+										$statRow['xp'],
+								));
 							}
 						}
 					}
+					$sql.=implode(').(', $values).')';
+					$sql.='ON DUPLICATE KEY UPDATE battle_avg_xp=VALUES(battle_avg_xp),battles=VALUES(battles),capture_points=VALUES(capture_points),damage_dealt=VALUES(damage_dealt),damage_received=VALUES(damage_received),draws=VALUES(draws),dropped_capture_points=VALUES(dropped_capture_points),frags=VALUES(frags),hits=VALUES(hits),hits_percents=VALUES(hits_percents),losses=VALUES(losses),shots=VALUES(shots),spotted=VALUES(spotted),survived_battles=VALUES(survived_battles),wins=VALUES(wins),xp=VALUES(xp)';
 				}
 			}
-			else
-				throw new CException($urlHelper->errorMessage);
 		}
-		if(count($statRows)>0){
-			$sqlInsert.=implode(',', $statRows);
-			$fieldNames=array_diff($fieldNames, array('account_id','tank_id','statistic'));
-			$updates=array();
-			foreach ($fieldNames as $fieldName){
-				$updates[]=$fieldName.'=VALUES('.$fieldName.')';
-			}
-			$sqlInsert.="ON DUPLICATE KEY UPDATE ".implode(',', $updates);
-			Yii::app()->db->createCommand($sqlInsert)->execute();
-		}
+		else
+			throw new CException($urlHelper->errorMessage);
 	}
 }
