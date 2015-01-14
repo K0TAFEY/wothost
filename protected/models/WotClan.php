@@ -23,7 +23,7 @@ class WotClan extends CActiveRecord
 	{
 		return array(
 			'members'=>array(self::HAS_MANY, 'WotMember', 'clan_id', 'index'=>'account_id', 'on'=>'members.escaped_at IS NULL'),
-			'accounts'=>array(self::HAS_MANY, 'WotAccounts', array('account_id'=>'account_id'), 'through'=>'members'),
+			'accounts'=>array(self::HAS_MANY, 'WotAccount', array('account_id'=>'account_id'), 'through'=>'members'),
 		);
 	}
 	
