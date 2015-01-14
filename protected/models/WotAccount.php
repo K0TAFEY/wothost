@@ -153,7 +153,7 @@ SQL;
 		}
 	}
 	
-	public function scanTankStat()
+	public function scanTanksStat()
 	{
 		$url='http://api.worldoftanks.ru/wot/tanks/stats/?'.http_build_query(array(
 				'application_id'=>Yii::app()->params['application_id'],
