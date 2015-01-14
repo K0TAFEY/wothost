@@ -48,7 +48,7 @@ SQL;
 			$url='http://api.worldoftanks.ru/wot/account/info/?'.http_build_query(array(
 					'application_id'=>Yii::app()->params['application_id'],
 					'language'=>'ru',
-					'fields'=>'account_id,clan_id,created_at,global_rating,last_battle_time,logout_at,nickname,updated_at,statistics.all, statistics.clan',
+					'fields'=>'account_id,clan_id,created_at,global_rating,last_battle_time,logout_at,nickname,updated_at,statistics',
 					'account_id'=>implode(',', $accountIds),
 			));
 			$urlHelper=new CUrlHelper();
