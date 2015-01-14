@@ -43,22 +43,47 @@ class WotClan extends CActiveRecord
 			return false;
 	}
 
+	public static function ensureClanId($clanId)
+	{
+		$sql=<<<SQL
+INSERT IGNORE INTO wot_clan(clan_id)
+VALUES($clanId)
+SQL;
+		Yii::app()->db->createCommand($sql)->execute();
+	}
+	
 	/**
 	 * 
-	 * @param integer $clanId
+	 * @param array() $clanIds
 	 * @param array() $data
 	 */
-	public static function wotLoad($clanId, $data)
+	public static function wotLoad($clanIds)
 	{
-		$clan=self::model()->findByPk($clanId);
-		if(empty($clan)){
-			$clan=new self();
-			$clan->clan_id=$clanId;
+		if(count($clanIds)>0){
+			$url='http://api.worldoftanks.ru/wot/clan/info/?'.http_build_query(array(
+					'application_id'=>Yii::app()->params['application_id'],
+					'language'=>'ru',
+					'clan_id'=>implode(',', array_keys($clanIds)),
+			));
+			$urlHelper=new CUrlHelper();
+			if($urlHelper->execute($url)){
+				$data=json_decode($urlHelper->content, true);
+				if($data['status']=='ok'){
+					foreach ($data['data'] as $clanId=>$clanData){
+						self::ensureClanId($clanId);
+						if(is_array($clanData)){
+							$clan=new WotClan();
+							foreach ($clanData as $key=>$value){
+								$clan->$key=$value;
+							}
+							$clan->setIsNewRecord(false);
+							$clan->update();
+							$clan->setMembers($clanData['members']);
+						}						
+					}
+				}
+			}
 		}
-		foreach ($data as $key=>$value){
-			$clan->$key=$value;
-		}
-		$clan->save(false);
 	}
 	
 	public static function process()
@@ -102,18 +127,19 @@ class WotClan extends CActiveRecord
 		$sql=<<<SQL
 INSERT INTO wot_member(clan_id,account_id,created_at,role)
 VALUES{values}
-ON DUPLICATE KEY UPDATE created_at=values(created_at),role=values(role),updated_at=values(updated_at)
+ON DUPLICATE KEY UPDATE role=values(role), escaped_at=null
 SQL;
 	//	CVarDumper::dump($value);
+		$accountIds=array();
 		if(is_array($value)){
-			
 			$values=array();
 			foreach ($value as $row){
+				$accountIds[]=$row['account_id'];
 				$values[]='('.
 				implode(',', array(
 					$this->clan_id,
 					$row['account_id'],
-					date("'Y-m-d H:i:s'",$row['created_at']),
+					$row['created_at'],
 					"'{$row['role']}'")
 				).')';
 			}
@@ -121,6 +147,13 @@ SQL;
 			//CVarDumper::dump($values);
 			Yii::app()->db->createCommand(str_replace('{values}', implode(',', $values), $sql))->execute();
 		}
+		
+		$accountIds=implode(',', $accountIds);
+		$sql=<<<SQL
+UPDATE wot_member wm SET wm.escaped_at = UNIX_TIMESTAMP()
+  WHERE wm.clan_id=:clan AND wm.escaped_at IS NULL AND wm.account_id IN ($accountIds)
+SQL;
+		Yii::app()->db->createCommand($sql)->execute(array('clan'=>$this->clan_id));
 	}
 	
 	public function setEmblems($value)
