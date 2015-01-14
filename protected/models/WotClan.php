@@ -137,13 +137,12 @@ SQL;
 			$values=array();
 			foreach ($value as $row){
 				$accountIds[]=$row['account_id'];
-				$values[]='('.
-				implode(',', array(
+				$values[]='('.implode(',', array(
 					$this->clan_id,
 					$row['account_id'],
 					$row['created_at'],
-					"'{$row['role']}'")
-				).')';
+					WotClanRole::getRoleId($row['role'], $row['role_i18n'])				
+				)).')';
 			}
 			//echo  implode(',', $values);
 			//CVarDumper::dump($values);
