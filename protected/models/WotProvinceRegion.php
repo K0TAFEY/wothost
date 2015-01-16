@@ -21,7 +21,7 @@ class WotProvinceRegion extends CActiveRecord
 		static $command;
 		if(empty($command)){
 			$sql=<<<SQL
-INSERT INGORE INTO wot_province_region(province_key, region_key)
+INSERT IGNORE INTO wot_province_region(province_key, region_key)
 VALUES(:provinceKey, :regionKey)
 SQL;
 			$command=Yii::app()->db->createCommand($sql);
