@@ -1,11 +1,9 @@
 <?php
 
-class WotArena extends EActiveRecord
+class WotArena extends CActiveRecord
 {
 	
-	private static $_models;
-	
-	public $onDuplicate= self::DUPLICATE_UPDATE;
+	private static $_keys;
 	
 	/**
 	 * 
@@ -21,18 +19,22 @@ class WotArena extends EActiveRecord
 		return 'wot_arena';
 	}
 
-	public static function getArenaId($name, $i18n)
+	public static function getArenaKey($arenaId, $arenaI18n)
 	{
-		if(isset(self::$_models[$name]))
-			return self::$_models[$name]->arena_id;
+		if(isset(self::$_keys[$arenaId]))
+			return self::$_keys[$arenaId];
 		if(preg_match('/(\d+)_\w+/', $name, $matches))
-			$arenaId=$matches[1];
-		$model=new WotArena();
-		$model->arena_id=$arenaId;
-		$model->arena_name=$name;
-		$model->arena_i18n=$i18n;
-		$model->save(false);
-		self::$_models[$name]=$model;
-		return $arenaId;
+			$arenaKey=$matches[1];
+		static $command;
+		if(empty($command)){
+			$sql=<<<SQL
+INSERT INTO wot_arena(arena_key,arena_id,arena_i18n)
+VALUES(:arenaKey,:arenaId,:arenaI18n)
+ON DUPLICATE KEY UPDATE arena_id=VALUES(arena_id),arena_i18n=VALUES(arena_i18n)
+SQL;
+			$command=Yii::app()->db->createCommand($sql);
+		}
+		$command->execute(compact('arenaKey','arenaId','arenaI18n'));
+		return self::$_keys[$name]=$arenaKey;
 	}
 }

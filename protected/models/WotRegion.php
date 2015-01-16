@@ -1,11 +1,9 @@
 <?php
 
-class WotRegion extends EActiveRecord
+class WotRegion extends CActiveRecord
 {
 	
-	private static $_models;
-	
-	public $onDuplicate = self::DUPLICATE_UPDATE;
+	private static $_keys;
 	
 	/**
 	 * 
@@ -21,20 +19,26 @@ class WotRegion extends EActiveRecord
 		return 'wot_region';
 	}
 
-	public static function getRegionId($name, $i18n)
+	public static function getRegionKey($regionId, $regionI18n)
 	{
-		if(isset(self::$_models[$name]))
-			return self::$_models[$name]->region_id;
-		if(preg_match('/\w+_(\d+)/', $name, $matches))
-			$regionId=$matches[1];
+		if(isset(self::$_keys[$regionId]))
+			return self::$_keys[$regionId];
+		if(preg_match('/\w+_(\d+)/', $regionId, $matches))
+			$regionKey=$matches[1];
 		else
 			throw new CException('Region ID invalid format');
-		$model=new self();
-		$model->region_id=$regionId;
-		$model->region_name=$name;
-		$model->region_i18n=$i18n;
-		$model->save(false);
-		self::$_models[$name]=$model;
-		return $regionId;
+
+		static $command;
+		if(empty($command)){
+			$sql=<<<SQL
+INSERT INTO wot_region(region_key,region_id,region_i18n)
+VALUES(:regionKey,:regionId,:regionI18n)
+ON DUPLICATE KEY UPDATE region_id=VALUES(region_id),region_i18n=VALUES(region_i18n)
+SQL;
+			$command=Yii::app()->db->createCommand($sql);
+		}
+		$command->execute(compact('regionKey','regionId','regionI18n'));
+		
+		return self::$_keys[$regionId]=$regionKey;
 	}
 }

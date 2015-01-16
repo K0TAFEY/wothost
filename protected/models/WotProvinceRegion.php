@@ -1,10 +1,7 @@
 <?php
 
-class WotProvinceRegion extends EActiveRecord
+class WotProvinceRegion extends CActiveRecord
 {
-	
-	public $onDuplicate=self::DUPLICATE_IGNORE;
-	
 	/**
 	 * 
 	 * @return WotProvinceRegion
@@ -17,5 +14,19 @@ class WotProvinceRegion extends EActiveRecord
 	public function tableName()
 	{
 		return 'wot_province_region';
-	}	
+	}
+	
+	public static function addProvinceRegion($provinceKey, $regionKey)
+	{
+		static $command;
+		if(empty($command)){
+			$sql=<<<SQL
+INSERT INGORE INTO wot_province_region(province_key, region_key)
+VALUES(:provinceKey, :regionKey)
+SQL;
+			$command=Yii::app()->db->createCommand($sql);
+		}
+		$command->execute(compact('provinceKey', 'regionKey'));
+	}
+	
 }
