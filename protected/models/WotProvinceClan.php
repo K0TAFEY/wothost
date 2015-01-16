@@ -24,11 +24,12 @@ class WotProvinceClan extends CActiveRecord
 				throw new CException("Map #$mapId not found");
 		
 		$helper=new CUrlHelper();
-		
+		$pageNo=0;
 		$count=100;
 		while ($count===100) 
 		{
 			$count=0;
+			$pageNo++;
 			$url='http://api.worldoftanks.ru/wot/globalwar/clans/?'.http_build_query(array(
 				'application_id'=>Yii::app()->params['application_id'],
 				'map_id'=>$map->map_id,
