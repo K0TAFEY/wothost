@@ -70,7 +70,7 @@ VALUES
 ON DUPLICATE KEY UPDATE map_key=LAST_INSERT_ID(map_key),province_id=VALUES(province_id),province_i18n=VALUES(province_i18n),status=VALUES(status),arena_key=VALUES(arena_key),vehicle_max_level=VALUES(vehicle_max_level),revenue=VALUES(revenue),primary_region_key=VALUES(primary_region_key),prime_time=VALUES(prime_time),updated_at=VALUES(updated_at),neighbors=VALUES(neighbors)
 SQL;
 				$command=Yii::app()->db->createCommand($sql);				
-				
+				$tran=Yii::app()->db->beginTransaction();
 				foreach ($data['data'] as $provId=>$provData){
 					
 					$command->execute(array(
@@ -97,6 +97,7 @@ SQL;
 						);						
 					}
 				}
+				$tran->commit();
 			}
 			else{
 				echo '<pre>';
