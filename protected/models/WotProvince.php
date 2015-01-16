@@ -37,15 +37,22 @@ class WotProvince extends CActiveRecord
 		);
 	}
 	
-	public static function getProvinceKey($provinceData)
+	public static function getProvinceKey($mapKey,$provinceId)
 	{
-		if(isset(self::$_keys[$name]))
-			return self::$_ids[$name];
-		$prov=new WotProvince();
-		$prov->province_name=$name;
-		$prov->save(false);
-		self::$_ids[$name]=$prov->province_id;
-		return $prov->province_id;
+		$key=$mapKey.':'.$provinceId;
+		if(isset(self::$_keys[$key]))
+			return self::$_keys[$key];
+		static $command;
+		if(empty($command)){
+			$sql=<<<SQL
+INSERT INTO wot_province(map_key,province_id)
+VALUES(:mapKey, :provinceId)
+ON DUPLICATE KEY UPDATE province_key=LAST_INSERT_ID(province_key) 
+SQL;
+			$command=Yii::app()->db->createCommand($sql);
+		}
+		$command->execute(compact('mapKey','provinceId'));
+		return self::$_keys[$key]=$command->getConnection()->getLastInsertID();
 	}
 	
 	public static function scan($mapName)
