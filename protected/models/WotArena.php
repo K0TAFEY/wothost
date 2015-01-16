@@ -23,7 +23,7 @@ class WotArena extends CActiveRecord
 	{
 		if(isset(self::$_keys[$arenaId]))
 			return self::$_keys[$arenaId];
-		if(preg_match('/(\d+)_\w+/', $name, $matches))
+		if(preg_match('/(\d+)_\w+/', $arenaId, $matches))
 			$arenaKey=$matches[1];
 		static $command;
 		if(empty($command)){
