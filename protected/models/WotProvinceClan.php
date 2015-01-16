@@ -43,7 +43,7 @@ class WotProvinceClan extends CActiveRecord
 					static $command;
 					if(empty($command)){
 						$sql=<<<SQL
-INSERT INTO wot_province_clan(province_key,clan_id,occupancy_time,start_time)
+INSERT INTO wot_province_clan(province_key,clan_id,occupancy_time,time_start)
 VALUES(:province_key,:clan_id,:occupancy_time,UNIX_TIMESTAMP() - MOD(UNIX_TIMESTAMP(),3600)-24*3600*:occupancy_time)
 ON DUPLICATE KEY UPDATE clan_id=VALUES(clan_id),occupancy_time=VALUES(occupancy_time)
 SQL;
