@@ -1,11 +1,11 @@
 <?php
 
-class WotClanProvince extends CActiveRecord
+class WotProvinceClan extends CActiveRecord
 {
 	
 	/**
 	 * 
-	 * @return WotClanProvince
+	 * @return WotProvinceClan
 	 */
 	public static function model($className=__CLASS__)
 	{
@@ -14,7 +14,7 @@ class WotClanProvince extends CActiveRecord
 	
 	public function tableName()
 	{
-		return 'wot_clan_province';
+		return 'wot_province_clan';
 	}
 	
 	public static function scan($mapId='globalmap')
@@ -38,21 +38,25 @@ class WotClanProvince extends CActiveRecord
 			if($helper->execute($url)){
 				$data=CJSON::decode($helper->content);
 				if($data['status']=='ok'){
+					$count=$data['count'];
 					static $command;
 					if(empty($command)){
 						$sql=<<<SQL
-INSERT INTO wot_clan_province(province_key,clan_id,start_time,revenue)
-VALUES(province_key,clan_id,start_time,revenue)
-ON DUPLICATE KEY UPDATE revenue=VALUES(revenue)
+INSERT INTO wot_province_clan(province_key,clan_id,occupancy_time,start_time)
+VALUES(:province_key,:clan_id,:occupancy_time,UNIX_TIMESTAMP() - MOD(UNIX_TIMESTAMP(),3600)-24*3600*:occupancy_time)
+ON DUPLICATE KEY UPDATE clan_id=VALUES(clan_id),occupancy_time=VALUES(occupancy_time)
 SQL;
 						$command=Yii::app()->db->createCommand($sql);
 					}
-					$count=$data['status'];
 					$tran=Yii::app()->db->beginTransaction();
 					foreach ($data['data'] as $row){
 						$clanId=$row['clan_id'];
 						foreach ($row['provinces'] as $provData){
-							$provinceKey=WotProvince::getProvinceKey($map->map_key,$provData['province_id']);
+							$command->execute(array(
+								'province_key'=>WotProvince::getProvinceKey($map->map_key,$provData['province_id']),
+								'clan_id'=>$clanId,
+								'occupancy_time'=>$provData['occupancy_time'],
+							));
 						}
 					}
 					$tran->commit();
