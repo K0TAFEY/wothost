@@ -31,7 +31,7 @@ class WotProvinceClan extends CActiveRecord
 			$count=0;
 			$url='http://api.worldoftanks.ru/wot/globalwar/clans/?'.http_build_query(array(
 				'application_id'=>Yii::app()->params['application_id'],
-				'map_id'=>$mapName,
+				'map_id'=>$map->map_id,
 				'limit'=>100,
 				'page_no'=>$pageNo,
 			));
