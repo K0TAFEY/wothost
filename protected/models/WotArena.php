@@ -35,6 +35,6 @@ SQL;
 			$command=Yii::app()->db->createCommand($sql);
 		}
 		$command->execute(compact('arenaKey','arenaId','arenaI18n'));
-		return self::$_keys[$name]=$arenaKey;
+		return self::$_keys[$arenaId]=$arenaKey;
 	}
 }
